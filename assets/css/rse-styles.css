@@ -1,0 +1,64 @@
+.ui-datepicker {
+	background: #fff;
+	box-shadow: 0 1px 1px rgba(0,0,0,0.5);
+}
+
+.ui-datepicker-header {
+	background: #eee;
+}
+
+.ui-datepicker-current-day {
+	background: #eee;
+}
+
+.ui-icon-circle-triangle-e {
+	background: url(../images/ui-icons_0078ae_256x240.png);
+	background-position: -32px 0;
+	height: 12px;
+	width: 12px;
+}
+
+.ui-icon-circle-triangle-w {
+	background: url(../images/ui-icons_0078ae_256x240.png);
+	background-position: -97px 0;
+	height: 12px;
+	width: 12px;
+}
+
+.ui-datepicker .ui-datepicker-prev-hover,.ui-datepicker .ui-datepicker-next-hover{
+	background: #ddd;
+	cursor: pointer;
+	top: 2px
+}
+
+.ui-datepicker .ui-datepicker-prev-hover {
+    left: 2px;
+}
+
+.ui-datepicker .ui-datepicker-next-hover {
+    right: 2px;
+}
+
+.rse_event_block {
+	margin-bottom: 1em;
+}
+
+.rse_event_block:after {
+	content: "";
+	display: table;
+	clear: both;
+}
+
+.rse_event_block_date {
+	float: left;
+	padding-right: 11px;
+}
+
+.rse_event_block label {
+	display: block;
+	margin-bottom: 0.5em;
+}
+
+.rse_text_field {
+	width: 100%;
+}
