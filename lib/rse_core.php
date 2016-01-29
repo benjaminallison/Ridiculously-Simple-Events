@@ -299,9 +299,10 @@ if( ! class_exists('RSE') ) :
 				"limit" => $atts["limit"]
 			);
 
-			$eventsArgs = self::rse_forumlate_args($args);
+			//$eventsArgs = self::rse_forumlate_args($args);
 			ob_start();
-			$eventsQuery = new WP_Query($eventsArgs);
+			$eventsQuery = self::rse_get_events($args);
+			// $eventsQuery = new WP_Query($eventsArgs);
 			include_once RSE_PLUGIN_DIR . "lib/rse_event_list.php" ;
 			return ob_get_clean();
 		}
@@ -328,8 +329,16 @@ if( ! class_exists('RSE') ) :
 	if( ! function_exists('the_event_start_date') ) :
 		function the_event_start_date() {
 			global $post;
-			$date = get_post_meta( $post->ID, "_rse_event_start_date", true);
+			$date = strtotime(get_post_meta( $post->ID, "_rse_event_start_date", true));
 			echo rse_print_date($date);
+		}
+	endif;
+
+	if( ! function_exists('the_event_month') ) :
+		function the_event_month() {
+			global $post;
+			$date = strtotime(get_post_meta( $post->ID, "_rse_event_start_date", true));
+			return date('F', $date);
 		}
 	endif;
 
