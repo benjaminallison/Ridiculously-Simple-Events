@@ -105,9 +105,9 @@ if( ! class_exists('RSE') ) :
 				$excerpt, 
 				'excerpt',
 				array(
-					"media_buttons" => false,
-					"teeny" => true,
-					"quicktags" => false
+					'media_buttons' => false,
+					'teeny' => true,
+					'quicktags' => false
 				)
 			);
 		}
@@ -148,8 +148,7 @@ if( ! class_exists('RSE') ) :
 			$rse_event_end_date = sanitize_text_field( $_POST['rse_event_end_date'] );
 			$rse_event_external_link = sanitize_text_field( $_POST['rse_event_external_link'] );
 			$rse_expiry = sanitize_text_field( $_POST['rse_expiry'] );
-			//prd($_POST);
-			// Update the meta field.
+
 			update_post_meta( $post_id, '_rse_event_start_date', $rse_event_start_date );
 			update_post_meta( $post_id, '_rse_event_end_date', $rse_event_end_date );
 			update_post_meta( $post_id, '_rse_event_external_link', $rse_event_external_link );
@@ -157,7 +156,9 @@ if( ! class_exists('RSE') ) :
 				update_post_meta( $post_id, '_rse_event_all_day', $_POST['rse_event_all_day'] );
 			}
 			update_post_meta( $post_id, '_rse_expiry', $rse_expiry );
-
+			if (isset($_POST['rse_archive'])) {
+				update_post_meta( $post_id, '_rse_archive', $_POST['rse_archive'] );
+			}
 		}
 
 		static public function rse_event_metabox_content( $post )
@@ -169,77 +170,70 @@ if( ! class_exists('RSE') ) :
 			$rse_event_external_link = get_post_meta( $post->ID, '_rse_event_external_link', true );
 			$rse_event_all_day = get_post_meta( $post->ID, '_rse_event_all_day', true );
 			$rse_expiry = get_post_meta( $post->ID, '_rse_expiry', true );
-			include_once RSE_PLUGIN_DIR . "lib/rse_metabox_template.php" ;
+			include_once RSE_PLUGIN_DIR . 'lib/rse_metabox_template.php' ;
 		}
 	
-		static public function rse_init_meta_box($post_type)
+		static public function rse_event_sidebar_metabox_content( $post )
+		{
+			// Add an nonce field so we can check for it later.
+			wp_nonce_field( 'rse_event_meta_box', 'rse_event_meta_box_nonce' );
+			$rse_archive = get_post_meta( $post->ID, '_rse_archive', true );
+			include_once RSE_PLUGIN_DIR . 'lib/rse_sidebar_metabox_template.php' ;
+		}
+
+		static public function rse_init_meta_boxes($post_type)
 		{
 			if ( $post_type === RSE_POST_TYPE) {
 				add_meta_box(
 					'event_details',
 					__( 'Event Details', 'rse' ),
 					'RSE::rse_event_metabox_content',
-					RSE_POST_TYPE
+					RSE_POST_TYPE,
+					'normal'
+				);
+
+				add_meta_box(
+					'event_options',
+					__( 'Event Options', 'rse' ),
+					'RSE::rse_event_sidebar_metabox_content',
+					RSE_POST_TYPE,
+					'side'
 				);
 			}
 		}
 
+		// DELETE OLD EVENTS, SLATED FOR DELETION
 		static public function rse_clean_old_events()
 		{
 			global $post;
-	
-			// DELETE OLD EVENTS, SLATED FOR DELETION
 			$eventsArgs = array(
-				"post_type" => RSE_POST_TYPE,
-				"post_per_page" => -1,
-				'meta_query' => array(
-					'relation' => 'AND',
-					array(
-						'key' => '_rse_event_end_date',
-						'value' => time(),
-						'compare' => '<='
-					),
-					array(
-						'key' => '_rse_expiry',
-						'value' => "delete",
-						'compare' => '='
-					)
-				)
+				'post_type' => RSE_POST_TYPE,
+				'post_per_page' => -1,
+				'post_status' => 'publish'
 			);
-	
 			$events = get_posts( $eventsArgs );
-			
 			foreach ( $events as $event ) {
-				wp_trash_post( $event->ID );
-			}
-	
-			// DRAFT OLD EVENTS, SLATED FOR DRAFT
-			$eventsArgs = array(
-				"post_type" => RSE_POST_TYPE,
-				"post_per_page" => -1,
-				'meta_query' => array(
-					'relation' => 'AND',
-					array(
-						'key' => '_rse_event_end_date',
-						'value' => time(),
-						'compare' => '<='
-					),
-					array(
-						'key' => '_rse_expiry',
-						'value' => "draft",
-						'compare' => '='
-					)
-				)
-			);
-	
-			$events = get_posts( $eventsArgs );
-	
-			foreach ( $events as $event ) {
-				$post = array( 'ID' => $event->ID, 'post_status' => "draft" );
-				wp_update_post($post);
+				$meta = get_post_meta($event->ID);
+				if( strtotime($meta['_rse_event_end_date'][0]) <= time() ) {
+					switch ($meta['_rse_expiry'][0]) {
+						case 'archive':
+							update_post_meta( $event->ID, '_rse_archive', true );
+							break;
+						case 'draft':
+							$post = array(
+								'ID' => $event->ID,
+								'post_status' => 'draft'
+							);
+							wp_update_post($post);
+							break;
+						case 'delete':
+							wp_trash_post( $event->ID );
+							break;
+					};
+				}
 			}
 		}
-		
+
 		static public function rse_single_template($single)
 		{
 			global $wp_query, $post;
@@ -255,19 +249,46 @@ if( ! class_exists('RSE') ) :
 
 		static public function rse_forumlate_args($args)
 		{
+			$metaQueryArgs = array(
+				array(
+					'key' => '_rse_event_end_date',
+					'value' => time(),
+					'compare' => '>=',
+					'type' => 'CHAR'
+				)
+			);
+
+			if (!isset($args['order'])) {
+				$args['order'] = "DESC";
+			}
+			if (!isset($args['limit'])) {
+				$args['limit'] = 99;
+			}
+			if (!isset($args['archive'])) {
+				$args['archive'] = false;
+			}
+
+			if ($args['archive']==true) {
+				$metaQueryArgs[] = array(
+					'key' => '_rse_archive',
+					'compare' => 'EXISTS'
+				);
+			} else {
+				$metaQueryArgs[] = array(
+					'key' => '_rse_archive',
+					'compare' => 'NOT EXISTS'
+				);
+			}
+
 			$eventsArgs = array(
-				"post_type" => RSE_POST_TYPE,
+				'post_type' => RSE_POST_TYPE,
 				"post_per_page" => -1,
 				'meta_key' => '_rse_event_end_date',
 				'orderby' => 'meta_value',
 				'order' => $args["order"],
 				'meta_query' => array(
-					array(
-						'key' => '_rse_event_end_date',
-						'value' => time(),
-						'compare' => '>=',
-						'type' => 'CHAR'
-					)
+					'relation' => 'AND',
+					$metaQueryArgs
 				)
 			);
 			if (isset($args["type"])) {
@@ -283,7 +304,7 @@ if( ! class_exists('RSE') ) :
 			return $eventsArgs;
 		}
 
-		static public function rse_get_events($args = array("order" => "DESC","limit" => 99))
+		static public function rse_get_events($args)
 		{
 			global $post;
 			$eventsArgs = self::rse_forumlate_args($args);
@@ -294,16 +315,14 @@ if( ! class_exists('RSE') ) :
 		{
 			global $post;
 			$args = array(
-				"order" => $atts["order"],
-				"type" => $atts["type"],
-				"limit" => $atts["limit"]
+				'order' => $atts['order'],
+				'type' => $atts['type'],
+				'limit' => $atts['limit']
 			);
 
-			//$eventsArgs = self::rse_forumlate_args($args);
 			ob_start();
-			$eventsQuery = self::rse_get_events($args);
-			// $eventsQuery = new WP_Query($eventsArgs);
-			include_once RSE_PLUGIN_DIR . "lib/rse_event_list.php" ;
+			self::rse_get_events($args);
+			include_once RSE_PLUGIN_DIR . 'lib/rse_event_list.php' ;
 			return ob_get_clean();
 		}
 	}
@@ -371,7 +390,20 @@ if( ! class_exists('RSE') ) :
 			}
 		}
 	endif;
-	if( ! function_exists('rse_event_link') ) :
+
+	if( ! function_exists('rse_is_archive') ) :
+		function rse_is_archive($postID = null) {
+			global $post;
+			if ($postID === null) {
+				$postID = $post->ID;
+			}
+			if ( get_post_meta($postID, "_rse_archive")) {
+				echo "<h6>This event is an archive</h6>";
+			}
+		}
+	endif;
+
+	if( ! function_exists('rse_event_url') ) :
 		function rse_event_url($postID = null) {
 			global $post;
 			if ($postID === null) {
@@ -385,7 +417,7 @@ if( ! class_exists('RSE') ) :
 			return $eventLink;
 		}
 	endif;
-	if( ! function_exists('echo_rse_event_link') ) :
+	if( ! function_exists('rse_event_link') ) :
 		function rse_event_link($postID = null, $link_text = "Read more", $style = "inline") {
 			global $post;
 			if ($postID === null) {
