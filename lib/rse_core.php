@@ -208,13 +208,13 @@ if( ! class_exists('RSE') ) :
 			global $post;
 			$eventsArgs = array(
 				'post_type' => RSE_POST_TYPE,
-				'post_per_page' => -1,
+				'posts_per_page' => -1,
 				'post_status' => 'publish'
 			);
 			$events = get_posts( $eventsArgs );
 			foreach ( $events as $event ) {
 				$meta = get_post_meta($event->ID);
-				if( strtotime($meta['_rse_event_end_date'][0]) <= time() ) {
+				if( isset($meta['_rse_expiry']) && strtotime($meta['_rse_event_end_date'][0]) <= time() ) {
 					switch ($meta['_rse_expiry'][0]) {
 						case 'archive':
 							update_post_meta( $event->ID, '_rse_archive', true );
