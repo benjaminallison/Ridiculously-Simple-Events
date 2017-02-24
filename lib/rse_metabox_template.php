@@ -33,6 +33,6 @@
 	<select id="rse_expiry" name="rse_expiry">
 		<option value="draft"<?php selected( $rse_expiry, 'draft');?>>Set to Draft</option>
 		<option value="delete"<?php selected( $rse_expiry, 'delete');?>>Set to Delete</option>
-		<option value="archive"<?php selected( $rse_expiry, 'archive');?>>Set to Archive</option>
+		<option value="archive"<?php selected( $rse_archive, 'archive');?>>Set to Archive</option>
 	</select>
 </div>

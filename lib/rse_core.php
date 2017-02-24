@@ -152,12 +152,16 @@ if( ! class_exists('RSE') ) :
 			update_post_meta( $post_id, '_rse_event_start_date', $rse_event_start_date );
 			update_post_meta( $post_id, '_rse_event_end_date', $rse_event_end_date );
 			update_post_meta( $post_id, '_rse_event_external_link', $rse_event_external_link );
-			if (isset($_POST['rse_event_all_day'])) {
+			if (isset($_POST['rse_event_all_day']) && $_POST['rse_event_all_day'] != false) {
 				update_post_meta( $post_id, '_rse_event_all_day', $_POST['rse_event_all_day'] );
+			} else {
+				delete_post_meta($post_id, '_rse_event_all_day');
 			}
 			update_post_meta( $post_id, '_rse_expiry', $rse_expiry );
 			if (isset($_POST['rse_archive'])) {
 				update_post_meta( $post_id, '_rse_archive', $_POST['rse_archive'] );
+			} else {
+				delete_post_meta($post_id, '_rse_archive');
 			}
 		}
 
