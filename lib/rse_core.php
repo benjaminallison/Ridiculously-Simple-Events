@@ -49,7 +49,8 @@ if( ! class_exists('RSE') ) :
 					'excerpt'
 				),
 				'rewrite'			=> array(
-					'slug'			=> 'events'
+					'slug'			=> 'events',
+					'with_front'	=> false
 				)
 			));
 		}
