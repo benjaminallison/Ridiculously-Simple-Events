@@ -9,13 +9,13 @@
 		<label for="rse_event_start_date">
 		<?php _e( 'Event Start Date:', 'rse' ); ?>
 		</label>
-		<input type="text" id="rse_event_start_date" name="rse_event_start_date" value="<?php echo esc_attr( $rse_event_start_date );?>" class="datepicker"/>
+		<input type="text" id="rse_event_start_date" name="rse_event_start_date" value="<?php echo esc_attr( $rse_event_start_date );?>" class="rse_date"/>
 	</div>
 	<div class="rse_event_block_date">
 		<label for="rse_event_end_date">
 		<?php _e( 'Event End Date:', 'rse' ); ?>
 		</label>
-		<input type="text" id="rse_event_end_date" name="rse_event_end_date" value="<?php echo esc_attr( $rse_event_end_date );?>" class="datepicker"/>
+		<input type="text" id="rse_event_end_date" name="rse_event_end_date" value="<?php echo esc_attr( $rse_event_end_date );?>" class="rse_date"/>
 	</div>
 </div>
 <div class="rse_event_block">

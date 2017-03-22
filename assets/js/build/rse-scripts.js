@@ -1,5 +1,6 @@
 jQuery(document).ready(function($) {
-	$(".datepicker").datetimepicker({
+	console.log("instantiating");
+	$(".rse_date").datetimepicker({
 		timepicker: true,
 		format: 'Y-m-d H:i',
 		inline: true,

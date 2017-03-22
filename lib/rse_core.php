@@ -147,23 +147,24 @@ if( ! class_exists('RSE') ) :
 			// Sanitize the user input.
 			$rse_event_start_date = sanitize_text_field( $_POST['rse_event_start_date'] );
 			$rse_event_end_date = sanitize_text_field( $_POST['rse_event_end_date'] );
-			$rse_event_external_link = sanitize_text_field( $_POST['rse_event_external_link'] );
-			$rse_expiry = sanitize_text_field( $_POST['rse_expiry'] );
 
-			update_post_meta( $post_id, '_rse_event_start_date', $rse_event_start_date );
-			update_post_meta( $post_id, '_rse_event_end_date', $rse_event_end_date );
-			update_post_meta( $post_id, '_rse_event_external_link', $rse_event_external_link );
 			if (isset($_POST['rse_event_all_day']) && $_POST['rse_event_all_day'] != false) {
+				$rse_event_end_date = $rse_event_start_date;
 				update_post_meta( $post_id, '_rse_event_all_day', $_POST['rse_event_all_day'] );
 			} else {
 				delete_post_meta($post_id, '_rse_event_all_day');
 			}
-			update_post_meta( $post_id, '_rse_expiry', $rse_expiry );
 			if (isset($_POST['rse_archive'])) {
 				update_post_meta( $post_id, '_rse_archive', $_POST['rse_archive'] );
 			} else {
 				delete_post_meta($post_id, '_rse_archive');
 			}
+			$rse_expiry = sanitize_text_field( $_POST['rse_expiry'] );
+			update_post_meta( $post_id, '_rse_expiry', $rse_expiry );
+			update_post_meta( $post_id, '_rse_event_start_date', $rse_event_start_date );
+			update_post_meta( $post_id, '_rse_event_end_date', $rse_event_end_date );
+			$rse_event_external_link = sanitize_text_field( $_POST['rse_event_external_link'] );
+			update_post_meta( $post_id, '_rse_event_external_link', $rse_event_external_link );
 		}
 
 		static public function rse_event_metabox_content( $post )
@@ -254,14 +255,6 @@ if( ! class_exists('RSE') ) :
 
 		static public function rse_forumlate_args($args)
 		{
-			$metaQueryArgs = array(
-				array(
-					'key' => '_rse_event_end_date',
-					'value' => time(),
-					'compare' => '>=',
-					'type' => 'CHAR'
-				)
-			);
 
 			if (!isset($args['order'])) {
 				$args['order'] = "DESC";
@@ -272,6 +265,14 @@ if( ! class_exists('RSE') ) :
 			if (!isset($args['archive'])) {
 				$args['archive'] = false;
 			}
+			$metaQueryArgs = array(
+				array(
+					'key' => '_rse_event_end_date',
+					'value' => time(),
+					'compare' => '>=',
+					'type' => 'CHAR'
+				)
+			);
 
 			if ($args['archive']==true) {
 				$metaQueryArgs[] = array(
