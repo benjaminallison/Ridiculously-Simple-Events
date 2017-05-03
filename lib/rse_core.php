@@ -274,7 +274,9 @@ if( ! class_exists('RSE') ) :
 				)
 			);
 
-			if ($args['archive']==true) {
+			if ($args['archive'] === 'all' ) {
+				
+			} else if ($args['archive']==true) {
 				$metaQueryArgs[] = array(
 					'key' => '_rse_archive',
 					'compare' => 'EXISTS'
