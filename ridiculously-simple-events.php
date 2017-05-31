@@ -3,14 +3,14 @@
  * Plugin Name: Ridiculously Simple Events
  * Plugin URI: http://www.benjaminallison.com/
  * Description: A no nonesense plugin to add basic events, with date range to show the event, event date/time, and description.
- * Version: 1.3.1
+ * Version: 1.3.2
  * Author: Benjamin Allison
  * Author URI: http://benjaminallison.com
  * Copyright: (c) 2015 Benjamin allison
  * Text Domain: rse
  */
 
-define('RSE_PLUGIN_VERSION', '1.3.1');
+define('RSE_PLUGIN_VERSION', '1.3.2');
 define('RSE_PLUGIN_NAME', "Ridiculously Simple Events");
 define('RSE_PLUGIN_BASENAME', plugin_basename( __FILE__ ));
 define('RSE_PLUGIN_DIR', plugin_dir_path(__FILE__));
@@ -23,7 +23,7 @@ add_action('init', 'RSE::rse_register_post_type');
 add_action('init', 'RSE::rse_register_taxonomy');
 add_action('add_meta_boxes', 'RSE::rse_init_meta_boxes');
 add_action('save_post', 'RSE::rse_save');
-add_action('admin_enqueue_scripts', 'RSE::rse_enqueue_scripts');
+add_action('admin_enqueue_scripts', 'RSE::rse_enqueue_scripts',99);
 add_action('admin_init', 'RSE::rse_replace_post_excerpt');
 add_shortcode('rse_events', 'RSE::rse_init_shortcode');
 add_action( 'rse_clean_old_events_hook', 'RSE::rse_clean_old_events' );
